@@ -15,6 +15,10 @@ Parameters:
     Type: String
     Default: "teradata-test-bucket-alpha"
 
+  TableName:
+    Type: String
+    Default: "events"
+
   VpcId:
     Type: AWS::EC2::VPC::Id
 
@@ -69,9 +73,10 @@ Resources:
         - Effect: Allow
           Principal: "*"
           Action:
-            - !Sub "s3:${BucketName}/*"
+            - "s3:GetObject"
+            - "s3:ListBucket"
           Resource:
-          - "*"
+          - !Sub "arn:aws:s3:::${BucketName}/*"
       RouteTableIds:
       - !Ref RouteTableId
       ServiceName: !Sub com.amazonaws.${AWS::Region}.s3
@@ -87,8 +92,9 @@ Resources:
           Principal: "*"
           Action:
             - "dynamodb:PutItem"
+            - "dynamodb:DescribeTable"
           Resource:
-          - "*"
+          - !Sub "arn:aws:dynamodb:us-east-1::table/${TableName}/*"
       RouteTableIds:
       - !Ref RouteTableId
       ServiceName: !Sub com.amazonaws.${AWS::Region}.dynamodb
@@ -98,7 +104,7 @@ Resources:
   EventsTable:
     Type: AWS::DynamoDB::Table
     Properties:
-      TableName: events
+      TableName: !Ref TableName
       AttributeDefinitions:
         - AttributeName: client_ip
           AttributeType: S

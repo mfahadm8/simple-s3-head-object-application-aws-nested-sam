@@ -15,7 +15,7 @@ Resources:
   VpcStack:
     Type: AWS::CloudFormation::Stack
     Properties:
-      TemplateURL: vpc.yaml
+      TemplateURL: templates/vpc.yaml
 
 
   # Application:
@@ -26,7 +26,7 @@ Resources:
   ApplicationStack:
       Type: AWS::CloudFormation::Stack
       Properties:
-        TemplateURL: template.yaml
+        TemplateURL: templates/application.yaml
         Parameters:
           Stage: !Ref Stage
           VpcId: !GetAtt VpcStack.Outputs.CustomVPCId
