@@ -1,16 +1,17 @@
-# AWS VPC Lambda with serverless
+# AWS API with Proxy Integration to VPC Lambda using Nested Cloudformation (SAM)
 
 This repo can be used to check if an object exists within specific specific bucket;
 
 It creates
 * An Api Gateway with Lambda Proxy Integration
 * Dynamo Table 
-*
 * A VPC - 10.1.0.0/16
-    * Two private subnets - 10.192.0.0/26 and 10.192.0.64/26
+    * Two private subnets - 10.1.3.0/24 and 10.1.4.0/24 
+    * Two public subnets - 10.1.1.0/24 and 10.1.2.0/24 
+    * NatGatway, RouteTable Association etc.
     * Security Group 
     * A VPC Endpoint for S3
-    * A VPC Endpoint for Dynamo
+    * A VPC Endpoint for DynamoDB
 * And of course the Lambda inside the VPC
 
 
