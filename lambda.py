@@ -18,6 +18,7 @@ def getResponseObj(code):
     return {
             "statusCode": code,
             "body": body ,
+            "isBase64Encoded" : false,
             "headers": {
                 'Content-Type': 'application/json',
             }
