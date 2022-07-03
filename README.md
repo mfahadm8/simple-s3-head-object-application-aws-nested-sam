@@ -42,5 +42,3 @@ To give Internet access to an AWS Lambda function that is linked to a VPC (eg to
 
    * The AWS Lambda function configured to use a Private Subnet that has a route table entry pointing to a NAT Gateway in the Public Subnet, OR
    * An Elastic IP address assigned to the Elastic Network Interface (ENI) of the Lambda function that appears in the VPC
-
-This would avoid the need for you to configure a VPC Endpoint for DynamoDB.
