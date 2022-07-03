@@ -35,6 +35,51 @@ Parameters:
     Type: AWS::EC2::SecurityGroup::Id 
 
 Resources:
+  S3IamPolicy:
+    Type: AWS::IAM::ManagedPolicy
+    Properties:
+      PolicyName: S3ReadObjectOnlyAccessPolicy
+      PolicyDocument: 
+        Version: 2012-10-17
+        Statement: 
+          - Effect: Allow
+            Action:
+              - "s3:GetObject"
+              - "s3:ListBucket"
+            Resource:
+            - !Sub "arn:aws:s3:::${BucketName}/*"
+
+
+  DynamoIamPolicy:
+    Type: AWS::IAM::ManagedPolicy
+    Properties:
+      PolicyName: DynamoPutOnlyAccessPolicy
+      PolicyDocument: 
+        Version: 2012-10-17
+        Statement: 
+          - Effect: Allow
+            Action:
+              - "dynamodb:PutItem"
+              - "dynamodb:DescribeTable"
+            Resource:
+            - !Sub "arn:aws:dynamodb:us-east-1::table/${TableName}*"
+
+  AWSLambdaVPCAccessPolicy:
+    Type: AWS::IAM::ManagedPolicy
+    Properties:
+      PolicyName: AWSLambdaVPCAccessExecutePolicy
+      PolicyDocument: 
+        Version: 2012-10-17
+        Statement: 
+          - Effect: Allow
+            Action:
+              - "ec2:CreateNetworkInterface"
+              -  "ec2:DescribeNetworkInterfaces"
+              -  "ec2:DeleteNetworkInterface"
+              -  "ec2:AssignPrivateIpAddresses"
+              -  "ec2:UnassignPrivateIpAddresses"
+            Resource: "*"
+
 
   LambdaObjectExists:
     Type: AWS::Serverless::Function
@@ -58,6 +103,11 @@ Resources:
               - method.request.querystring.bucket_name
               - method.request.querystring.object_name
             RestApiId: !Ref ApiDeployment
+      Policies:
+        - AWSLambdaExecute
+        - !Ref S3IamPolicy
+        - !Ref DynamoIamPolicy
+        - !Ref AWSLambdaVPCAccessPolicy
 
   ApiDeployment:
     Type: AWS::Serverless::Api
@@ -109,7 +159,7 @@ Resources:
         - AttributeName: client_ip
           AttributeType: S
         - AttributeName: timestamp
-          AttributeType: S
+          AttributeType: N
       KeySchema:
         - AttributeName: client_ip
           KeyType: HASH
