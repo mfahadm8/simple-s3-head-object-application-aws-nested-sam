@@ -94,7 +94,7 @@ Resources:
             - "dynamodb:PutItem"
             - "dynamodb:DescribeTable"
           Resource:
-          - !Sub "arn:aws:dynamodb:us-east-1::table/${TableName}/*"
+          - !Sub "arn:aws:dynamodb:us-east-1::table/${TableName}*"
       RouteTableIds:
       - !Ref RouteTableId
       ServiceName: !Sub com.amazonaws.${AWS::Region}.dynamodb

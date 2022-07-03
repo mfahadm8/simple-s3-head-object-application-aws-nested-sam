@@ -129,18 +129,15 @@ Resources:
       GroupName: security group for Lambda in VPC
       GroupDescription: Manages the access to and from the EC2 ins.
       VpcId: !Ref CustomVPC
-      SecurityGroupEgress:
+      SecurityGroupIngress:
         - Description: Egress port of the http
           IpProtocol: tcp
           CidrIp: 0.0.0.0/0
-          FromPort: 80
-          ToPort: 80
-        - Description: Egress port of the https
-          IpProtocol: tcp
-          CidrIp: 0.0.0.0/0
-          FromPort: 443
-          ToPort: 443
-
+          FromPort: 1024
+          ToPort:  65535
+      SecurityGroupEgress:
+        - IpProtocol: -1
+          CidrIp: '0.0.0.0/0'
 
 
 Outputs:
