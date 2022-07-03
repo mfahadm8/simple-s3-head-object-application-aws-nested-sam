@@ -1,0 +1,8 @@
+sam-installation/*
+templetes/temp.yaml
+aws-sam-cli-linux-x86_64.zip
+buildspec.yaml
+iam
+iam2
+iam3
+test.ipynb

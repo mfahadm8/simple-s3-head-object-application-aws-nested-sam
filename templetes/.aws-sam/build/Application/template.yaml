@@ -1,0 +1,106 @@
+AWSTemplateFormatVersion: 2010-09-09
+Transform: AWS::Serverless-2016-10-31
+Description: Contains Infrastructure for the Core Task including AWS Lambda, Dynamo,
+  VPC endpoints etc.
+Parameters:
+  Stage:
+    Type: String
+    Default: dev
+    AllowedValues:
+    - dev
+    - staging
+    - prod
+Resources:
+  VpcStack:
+    Type: AWS::CloudFormation::Stack
+    Properties:
+      TemplateURL: VpcStack/template.yaml
+    Metadata:
+      SamResourceId: VpcStack
+  LambdaObjectExists:
+    Type: AWS::Serverless::Function
+    Properties:
+      Handler: lambda.lambda_handler
+      Runtime: python3.8
+      CodeUri: LambdaObjectExists
+      VpcConfig:
+        SecurityGroupIds:
+        - Ref: CustomSecurityGroup
+        SubnetIds:
+          Ref: PrivateSubnet1
+      Events:
+        GetObjectStatus:
+          Type: Api
+          Properties:
+            Path: /
+            Method: get
+            RequestParameters:
+            - method.request.querystring.bucket_name
+            - method.request.querystring.object_name
+            RestApiId:
+              Ref: ApiDeployment
+    Metadata:
+      SamResourceId: LambdaObjectExists
+  ApiDeployment:
+    Type: AWS::Serverless::Api
+    Properties:
+      StageName:
+        Ref: Stage
+  S3Endpoint:
+    Type: AWS::EC2::VPCEndpoint
+    Properties:
+      PolicyDocument: null
+      Version: 2012-10-17
+      Statement:
+      - Effect: Allow
+        Principal: '*'
+        Action:
+        - Fn::Sub: s3:${bucketName}/*
+        Resource:
+        - '*'
+      RouteTableIds:
+      - Ref: PrivateRouteTable
+      ServiceName:
+        Fn::Sub: com.amazonaws.${AWS::Region}.s3
+      VpcId:
+        Ref: CustomVPC
+  dynamoDBEndpoint:
+    Type: AWS::EC2::VPCEndpoint
+    Properties:
+      PolicyDocument: null
+      Version: 2012-10-17
+      Statement:
+      - Effect: Allow
+        Principal: '*'
+        Action:
+        - dynamodb:PutItem
+        Resource:
+        - '*'
+      RouteTableIds:
+      - Ref: PrivateRouteTable
+      ServiceName:
+        Fn::Sub: com.amazonaws.${AWS::Region}.dynamodb
+      VpcId:
+        Ref: CustomVPC
+  EventsTable:
+    Type: AWS::DynamoDB::Table
+    Properties:
+      TableName: events
+      AttributeDefinitions:
+      - AttributeName: client_ip
+        AttributeType: S
+      - AttributeName: timestamp
+        AttributeType: N
+      KeySchema:
+      - AttributeName: client_ip
+        KeyType: HASH
+      - AttributeName: timestamp
+        KeyType: HASH
+      ProvisionedThroughput:
+        ReadCapacityUnits: 1
+        WriteCapacityUnits: 1
+Outputs:
+  Url:
+    Description: Endpoint URL
+    Value:
+      Fn::Sub: https://${ApiDeployment}.execute-api.${AWS::Region}.amazonaws.com/${Stage}

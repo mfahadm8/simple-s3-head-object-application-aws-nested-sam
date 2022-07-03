@@ -1,0 +1,112 @@
+AWSTemplateFormatVersion: 2010-09-09
+Transform: AWS::Serverless-2016-10-31
+Description: >-
+  Contains Infrastructure for the Core Task including AWS Lambda, Dynamo, VPC endpoints etc.
+Parameters:
+  Stage:
+    Type: String
+
+  VpcId:
+    Type: AWS::EC2::VPC::Id
+
+  SubnetId1:
+    Type: AWS::EC2::Subnet::Id
+
+  SubnetId2:
+    Type: AWS::EC2::Subnet::Id #Alternatively we can use List<AWS::EC2::SecurityGroup::Id>
+
+  RouteTableId:
+    Type: AWS::EC2::RouteTable::Id 
+
+  SecurityGroupId:
+    Type: AWS::EC2::SecurityGroup::Id 
+
+
+
+Resources:
+
+  LambdaObjectExists:
+    Type: AWS::Serverless::Function
+    Properties:
+      Handler: lambda.lambda_handler
+      Runtime: python3.8
+      CodeUri: ../
+      VpcConfig:
+        SecurityGroupIds:
+          - !Ref SecurityGroupId
+        SubnetIds: 
+          - !Ref SubnetId1
+          - !Ref SubnetId2
+      Events:
+        GetObjectStatus:
+          Type: Api
+          Properties:
+            Path: /
+            Method: get
+            RequestParameters:
+              - method.request.querystring.bucket_name
+              - method.request.querystring.object_name
+            RestApiId: !Ref ApiDeployment
+
+  ApiDeployment:
+    Type: AWS::Serverless::Api
+    Properties:
+      StageName: !Ref Stage
+
+  S3Endpoint:
+    Type: AWS::EC2::VPCEndpoint
+    Properties:
+      PolicyDocument:
+        Version: 2012-10-17
+        Statement:
+        - Effect: Allow
+          Principal: "*"
+          Action:
+            - !Sub "s3:${bucketName}/*"
+          Resource:
+          - "*"
+      RouteTableIds:
+      - !Ref RouteTableId
+      ServiceName: !Sub com.amazonaws.${AWS::Region}.s3
+      VpcId: !Ref VpcId
+
+  dynamoDBEndpoint:
+    Type: AWS::EC2::VPCEndpoint
+    Properties:
+      PolicyDocument:
+        Version: 2012-10-17
+        Statement:
+        - Effect: Allow
+          Principal: "*"
+          Action:
+            - "dynamodb:PutItem"
+          Resource:
+          - "*"
+      RouteTableIds:
+      - !Ref RouteTable
+      ServiceName: !Sub com.amazonaws.${AWS::Region}.dynamodb
+      VpcId: !Ref VpcId
+
+
+  EventsTable:
+    Type: AWS::DynamoDB::Table
+    Properties:
+      TableName: events
+      AttributeDefinitions:
+        - AttributeName: client_ip
+          AttributeType: S
+        - AttributeName: timestamp
+          AttributeType: N
+      KeySchema:
+        - AttributeName: client_ip
+          KeyType: HASH
+        - AttributeName: timestamp
+          KeyType: HASH
+      ProvisionedThroughput:
+        ReadCapacityUnits: 1
+        WriteCapacityUnits: 1
+
+Outputs:
+  Url:
+   Description: Endpoint URL
+   Value: !Sub https://${ApiDeployment}.execute-api.${AWS::Region}.amazonaws.com/${Stage}

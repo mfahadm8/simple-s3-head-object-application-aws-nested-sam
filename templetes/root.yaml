@@ -1,0 +1,41 @@
+AWSTemplateFormatVersion: 2010-09-09
+Transform: AWS::Serverless-2016-10-31
+Description: Root stack
+
+Parameters:
+  Stage:
+    Type: String
+    Default: "dev"
+    AllowedValues: 
+      - dev
+      - staging
+      - prod
+      
+Resources:
+  VpcStack:
+    Type: AWS::CloudFormation::Stack
+    Properties:
+      TemplateURL: ./vpc.yaml
+
+
+  # Application:
+  #   Type: AWS::Serverless::Application
+  #   Properties:
+  #     Location: template.yaml
+
+  ApplicationStack:
+      Type: AWS::CloudFormation::Stack
+      Properties:
+        TemplateURL: template.yaml
+        Parameters:
+          Stage: !Ref Stage
+          VpcId: !GetAtt VpcStack.Outputs.CustomVPC
+          SubnetId1: !GetAtt VpcStack.Outputs.PrivateSubnet1
+          SubnetId2: !GetAtt VpcStack.Outputs.PrivateSubnet2
+          RouteTableId: !GetAtt VpcStack.Outputs.PrivateRouteTable
+          DefaultSecurityGroup: !GetAtt VpcStack.Outputs.CustomSecurityGroup
+        
+
+Outputs:
+  EndpointUrl:
+   Value: !GetAtt ApplicationStack.Outputs.Url
