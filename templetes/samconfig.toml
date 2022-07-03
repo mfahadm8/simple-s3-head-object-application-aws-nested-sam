@@ -8,5 +8,5 @@ s3_prefix = "test-stack"
 region = "us-east-1"
 confirm_changeset = true
 disable_rollback = true
-capabilities = "CAPABILITY_AUTO_EXPAND"
+capabilities = ["CAPABILITY_IAM',"CAPABILITY_AUTO_EXPAND"]
 image_repositories = []
