@@ -93,7 +93,7 @@ Resources:
                   - "dynamodb:DescribeTable"
                 Effect: "Allow"
                 Resource:   
-                  - !Sub "arn:aws:dynamodb:*:*:table/${TableName}"
+                  - !Sub "arn:aws:dynamodb:*:*:table/${TableName}" # Alternatively we can use AWS::Region and AWS::AccountId instead of *
           PolicyName: "dynamoPutOnly" 
 
   LambdaObjectExists:
@@ -156,7 +156,7 @@ Resources:
             - "dynamodb:PutItem"
             - "dynamodb:DescribeTable"
           Resource:
-          - !Sub "arn:aws:dynamodb:*:*:table/${TableName}"
+          - !Sub "arn:aws:dynamodb:*:*:table/${TableName}" # Alternatively we can use AWS::Region and AWS::AccountId instead of *
       RouteTableIds:
       - !Ref RouteTableId
       ServiceName: !Sub com.amazonaws.${AWS::Region}.dynamodb
