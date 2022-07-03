@@ -1,5 +1,5 @@
 AWSTemplateFormatVersion: '2010-09-09'
-Description: Create VPC, Subnets, EFS with Access points and EC2.
+Description: Create VPC, Subnets, Security Group
 
 Resources:
   CustomVPC:
@@ -40,7 +40,7 @@ Resources:
       MapPublicIpOnLaunch: false
   
   
-  InternetGateway:
+  InternetGateway1:
     Type: 'AWS::EC2::InternetGateway'
     Properties:
       Tags:
@@ -53,7 +53,7 @@ Resources:
     Type: 'AWS::EC2::VPCGatewayAttachment'
     Properties:
       VpcId: !Ref CustomVPC
-      InternetGatewayId: !Ref InternetGateway
+      InternetGatewayId: !Ref InternetGateway1
   
   PublicRouteTable:
     Type: 'AWS::EC2::RouteTable'
@@ -69,7 +69,7 @@ Resources:
     Properties:
       RouteTableId: !Ref PublicRouteTable
       DestinationCidrBlock: 0.0.0.0/0
-      GatewayId: !Ref InternetGateway
+      GatewayId: !Ref InternetGateway1
   
   PublicSubnet1RouteTableAssociation:
     Type: 'AWS::EC2::SubnetRouteTableAssociation'
@@ -83,7 +83,7 @@ Resources:
       SubnetId: !Ref PublicSubnet2
       RouteTableId: !Ref PublicRouteTable
   
-  NatGateway:
+  NatGatewy:
     Type: "AWS::EC2::NatGateway"
     DependsOn: NatPublicIP
     Properties: 
@@ -109,7 +109,7 @@ Resources:
     Properties:
       RouteTableId: !Ref PrivateRouteTable
       DestinationCidrBlock: 0.0.0.0/0
-      NatGatewayId: !Ref NatGateway
+      NatGatewayId: !Ref NatGatewy
   
   PrivateSubnet1RouteTableAssociation:
     Type: 'AWS::EC2::SubnetRouteTableAssociation'
@@ -145,22 +145,22 @@ Resources:
 
 Outputs:
 
-  CustomSecurityGroup:
+  CustomSecurityGroupId:
     Description: Default Security Group
-    Value: !GetAtt CustomSecurityGroup
+    Value: !Ref CustomSecurityGroup
 
-  PrivateSubnet1:
+  PrivateSubnet1Id:
     Description: Subnet 1 in the VPC
     Value: !Ref PrivateSubnet1
   
-  PrivateSubnet2:
+  PrivateSubnet2Id:
     Description: Subnet 2 in the VPC
     Value: !Ref PrivateSubnet2
 
-  CustomVPC:
+  CustomVPCId:
     Description: The Mount Target VPC Id
     Value: !Ref CustomVPC
 
-  PrivateRouteTable:
+  PrivateRouteTableId:
     Description: The Mount Target VPC Id
     Value: !Ref PrivateRouteTable
