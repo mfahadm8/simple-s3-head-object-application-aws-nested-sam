@@ -24,6 +24,9 @@ I am using Cloudformation (SAM) to deploy an AWS Lambda inside a VPC. All traffi
 ### Deploy
 
 ```sh
+# To build
+sam build -t template.yaml
+# To deploy
 sam deploy  -t template.yaml  --stack-name test-stack  --capabilities CAPABILITY_IAM CAPABILITY_AUTO_EXPAND --region us-east-1
 ```
 :tada:
@@ -38,7 +41,7 @@ aws cloudformation delete-stack --stack-name test-stack
 
 ## Api Endpoint
 | Sr | Endpoint Url | Method |
-| :-: | :-: | 
+| :-: | :-: | :-: | 
 | 1 | https://uji57wdfx1.execute-api.us-east-1.amazonaws.com/dev | GET |
 
 ## Testing
