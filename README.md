@@ -45,12 +45,12 @@ aws cloudformation delete-stack --stack-name test-stack
 | 1 | https://uji57wdfx1.execute-api.us-east-1.amazonaws.com/dev | GET |
 
 ## Testing
- Please note that permission was only granted to bucket;
-| Sr | Parameter Name | 
+| Sr | Query Parameter Name | 
 | :-: | :-: | 
 | 1 | bucket_name  | 
 | 2 | object_name  | 
 
+ Please note that permission was only granted to bucket: teradata-test-bucket-alpha;
 
 ### Test Cases
 
