@@ -30,14 +30,17 @@ def lambda_handler(events,context=None):  #we could have used schema validation 
     print(events)
     client_ip=events['requestContext']['identity']['sourceIp']
     requestTimeEpoch=events['requestContext']['requestTimeEpoch']
-    if events["httpMethod"] == "GET":
-        s3_object_name = events["queryStringParameters"]["object_name"]
-        bucket_name = events["queryStringParameters"]["bucket_name"]
-    elif events["httpMethod"] == "POST":
-        body=json.loads(events.get("body",""))
-        s3_object_name=body.get("bucket_name","")
-        bucket_name=body.get("object_name","")
-    else:
+    try:
+        if events["httpMethod"] == "GET":
+            s3_object_name = events["queryStringParameters"]["object_name"]
+            bucket_name = events["queryStringParameters"]["bucket_name"]
+        elif events["httpMethod"] == "POST":
+            body=json.loads(events.get("body",""))
+            s3_object_name=body.get("bucket_name","")
+            bucket_name=body.get("object_name","")
+        else:
+            return getResponseObj(400)
+    except:
         return getResponseObj(400)
 
     print(bucket_name,s3_object_name)
@@ -61,5 +64,3 @@ def lambda_handler(events,context=None):  #we could have used schema validation 
         recordTransaction(client_ip,requestTimeEpoch,status_code)
         print(response,status_code)
         return response
-
-
