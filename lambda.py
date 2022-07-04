@@ -10,21 +10,24 @@ def recordTransaction(client_ip,timestamp,code):
 
 def getResponseObj(code):
     if code ==200:
-        body = 'The object exists in the s3 bucket!'
+        body = { 'success': True,'message':'The object exists in the s3 bucket!'}
     elif code==404:
         body={ "error": 'The object does not exist in s3 bucket!' }
     else:
         body={ "error": 'Bad request!' }
     return {
-            "statusCode": code,
-            "body": body ,
-            "isBase64Encoded" : False,
-            "headers": {
-                'Content-Type': 'application/json',
-            }
-        }
+        'statusCode': code,
+        'headers': {
+            'Content-Type': 'application/json',
+            'Access-Control-Allow-Origin': '*'
+        },
+        'body': json.dumps(body),
+        "isBase64Encoded": False
+    }
+    
 
 def lambda_handler(events,context=None):  #we could have used schema validation on events as decorator function
+    print(events)
     client_ip=events['requestContext']['identity']['sourceIp']
     requestTimeEpoch=events['requestContext']['requestTimeEpoch']
     if events["httpMethod"] == "GET":
@@ -37,7 +40,6 @@ def lambda_handler(events,context=None):  #we could have used schema validation 
     else:
         return getResponseObj(400)
 
-    s3=boto3.client("s3") 
     print(bucket_name,s3_object_name)
     # Alternatively, a seperate asynchronous lambda invocation for logging records 
     # asynchronously in dynamodb could be performed to provide the user response with minimal latency
@@ -47,7 +49,7 @@ def lambda_handler(events,context=None):  #we could have used schema validation 
 
     try:
         s3.Object(bucket_name, s3_object_name).load()  # performs head operation onto the object, alternatively boto3 client's head_object could have been used as well
-        status_code='200'
+        status_code=200
         print(status_code)
         response=getResponseObj(status_code)
         recordTransaction(client_ip,requestTimeEpoch,status_code)
@@ -59,4 +61,5 @@ def lambda_handler(events,context=None):  #we could have used schema validation 
         recordTransaction(client_ip,requestTimeEpoch,status_code)
         print(response,status_code)
         return response
+
 
